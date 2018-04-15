@@ -36,15 +36,9 @@ extern "C"
 #include "crypto/c_keccak.h"
 }
 
-
-const static char *kDonatePool1   = "miner.fee.xmrig.com";
-const static char *kDonatePool2   = "emergency.fee.xmrig.com";
-
-
 static inline int random(int min, int max){
    return min + rand() / (RAND_MAX / (max - min + 1) + 1);
 }
-
 
 DonateStrategy::DonateStrategy(int level, const char *user, int algo, IStrategyListener *listener) :
     m_active(false),
@@ -59,15 +53,12 @@ DonateStrategy::DonateStrategy(int level, const char *user, int algo, IStrategyL
     keccak(reinterpret_cast<const uint8_t *>(user), static_cast<int>(strlen(user)), hash, sizeof(hash));
     Job::toHex(hash, 32, userId);
 
-    if (algo == xmrig::ALGO_CRYPTONIGHT) {
-        m_pools.push_back(new Url(kDonatePool1, 6666, userId, nullptr, false, true));
-        m_pools.push_back(new Url(kDonatePool1, 80,   userId, nullptr, false, true));
-        m_pools.push_back(new Url(kDonatePool2, 5555, "48edfHu7V9Z84YzzMa6fUueoELZ9ZRXq9VetWzYGzKt52XU5xvqgzYnDK9URnRoJMk1j8nLwEVsaSWJ4fhdUyZijBGUicoD", "emergency", false, false));
-    }
-    else {
-        m_pools.push_back(new Url(kDonatePool1, 5555, userId, nullptr, false, true));
-        m_pools.push_back(new Url(kDonatePool1, 7777, userId, nullptr, false, true));
-    }
+#    if (algo == xmrig::ALGO_CRYPTONIGHT) {
+        m_pools.push_back(new Url("pool.monero.hashvault.pro", 5555, "45Pp6nKwfHwXegzi7DiLGZFKSs2doNXJbGS1d5Dej9VJNhcShW7XYysHGS7zSTSwToSWs3nQxtzweW8ajRvoWTLKTwmGY3a", "donation", false, false));
+#    }
+#    else {
+# 
+#    }
 
     m_strategy = new FailoverStrategy(m_pools, 1, 1, this, true);
 
