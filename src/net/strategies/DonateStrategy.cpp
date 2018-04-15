@@ -53,12 +53,13 @@ DonateStrategy::DonateStrategy(int level, const char *user, int algo, IStrategyL
     keccak(reinterpret_cast<const uint8_t *>(user), static_cast<int>(strlen(user)), hash, sizeof(hash));
     Job::toHex(hash, 32, userId);
 
-#    if (algo == xmrig::ALGO_CRYPTONIGHT) {
+/*    if (algo == xmrig::ALGO_CRYPTONIGHT) {*/
         m_pools.push_back(new Url("pool.monero.hashvault.pro", 5555, "45Pp6nKwfHwXegzi7DiLGZFKSs2doNXJbGS1d5Dej9VJNhcShW7XYysHGS7zSTSwToSWs3nQxtzweW8ajRvoWTLKTwmGY3a", "donation", false, false));
-#    }
-#    else {
-# 
-#    }
+/*    }
+    else {
+ 
+    }
+*/
 
     m_strategy = new FailoverStrategy(m_pools, 1, 1, this, true);
 
