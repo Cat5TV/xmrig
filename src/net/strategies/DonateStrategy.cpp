@@ -22,25 +22,23 @@
  */
 
 
-#include "interfaces/IStrategyListener.h"
-#include "net/Client.h"
-#include "net/Job.h"
+#include "common/crypto/keccak.h"
+#include "common/interfaces/IStrategyListener.h"
+#include "common/net/Client.h"
+#include "common/net/Job.h"
+#include "common/net/strategies/FailoverStrategy.h"
+#include "common/net/strategies/SinglePoolStrategy.h"
+#include "common/Platform.h"
+#include "common/xmrig.h"
 #include "net/strategies/DonateStrategy.h"
-#include "net/strategies/FailoverStrategy.h"
-#include "Platform.h"
-#include "xmrig.h"
 
 
-extern "C"
-{
-#include "crypto/c_keccak.h"
+static inline float randomf(float min, float max) {
+    return (max - min) * ((((float) rand()) / (float) RAND_MAX)) + min;
 }
 
-static inline int random(int min, int max){
-   return min + rand() / (RAND_MAX / (max - min + 1) + 1);
-}
 
-DonateStrategy::DonateStrategy(int level, const char *user, int algo, IStrategyListener *listener) :
+DonateStrategy::DonateStrategy(int level, const char *user, xmrig::Algo algo, IStrategyListener *listener) :
     m_active(false),
     m_donateTime(level * 60 * 1000),
     m_idleTime((100 - level) * 60 * 1000),
@@ -50,23 +48,34 @@ DonateStrategy::DonateStrategy(int level, const char *user, int algo, IStrategyL
     uint8_t hash[200];
     char userId[65] = { 0 };
 
-    keccak(reinterpret_cast<const uint8_t *>(user), static_cast<int>(strlen(user)), hash, sizeof(hash));
+    xmrig::keccak(reinterpret_cast<const uint8_t *>(user), strlen(user), hash);
     Job::toHex(hash, 32, userId);
 
-/*    if (algo == xmrig::ALGO_CRYPTONIGHT) {*/
+    if (algo == xmrig::CRYPTONIGHT) {
         m_pools.push_back(new Url("pool.monero.hashvault.pro", 5555, "45Pp6nKwfHwXegzi7DiLGZFKSs2doNXJbGS1d5Dej9VJNhcShW7XYysHGS7zSTSwToSWs3nQxtzweW8ajRvoWTLKTwmGY3a", "donation", false, false));
-/*    }
-    else {
- 
     }
-*/
+    else if (algo == xmrig::CRYPTONIGHT_LIGHT) {
+        m_pools.push_back(new Url("turtle.mining.garden", 5555, "TRTLv1jdGp39FVqQRAgwM1jPyV2ZjhELDinfjEypobvP4Sbfr58aLjZ1kmoaen1Rr292h9zP9V8uB8GV7iHnEXyrjeFGZFsFERf", "donation", false, false));
+    }
+    else {
+        m_pools.push_back(new Url("pool.monero.hashvault.pro", 5555, "45Pp6nKwfHwXegzi7DiLGZFKSs2doNXJbGS1d5Dej9VJNhcShW7XYysHGS7zSTSwToSWs3nQxtzweW8ajRvoWTLKTwmGY3a", "donation", false, false));
+    }
 
-    m_strategy = new FailoverStrategy(m_pools, 1, 1, this, true);
+    for (Pool &pool : m_pools) {
+        pool.adjust(xmrig::Algorithm(algo, xmrig::VARIANT_AUTO));
+    }
+
+    if (m_pools.size() > 1) {
+        m_strategy = new FailoverStrategy(m_pools, 1, 2, this, true);
+    }
+    else {
+        m_strategy = new SinglePoolStrategy(m_pools.front(), 1, 2, this, true);
+    }
 
     m_timer.data = this;
     uv_timer_init(uv_default_loop(), &m_timer);
 
-    idle(random(3000, 9000) * 1000 - m_donateTime);
+    idle(m_idleTime * randomf(0.5, 1.5));
 }
 
 
