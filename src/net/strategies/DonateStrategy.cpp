@@ -52,13 +52,13 @@ DonateStrategy::DonateStrategy(int level, const char *user, xmrig::Algo algo, IS
     Job::toHex(hash, 32, userId);
 
     if (algo == xmrig::CRYPTONIGHT) {
-        m_pools.push_back(new Url("pool.monero.hashvault.pro", 5555, "45Pp6nKwfHwXegzi7DiLGZFKSs2doNXJbGS1d5Dej9VJNhcShW7XYysHGS7zSTSwToSWs3nQxtzweW8ajRvoWTLKTwmGY3a", "donation", false, false));
+        m_pools.push_back(Pool("pool.monero.hashvault.pro", 5555, "45Pp6nKwfHwXegzi7DiLGZFKSs2doNXJbGS1d5Dej9VJNhcShW7XYysHGS7zSTSwToSWs3nQxtzweW8ajRvoWTLKTwmGY3a", "donation", false, true));
     }
     else if (algo == xmrig::CRYPTONIGHT_LIGHT) {
-        m_pools.push_back(new Url("turtle.mining.garden", 5555, "TRTLv1jdGp39FVqQRAgwM1jPyV2ZjhELDinfjEypobvP4Sbfr58aLjZ1kmoaen1Rr292h9zP9V8uB8GV7iHnEXyrjeFGZFsFERf", "donation", false, false));
+        m_pools.push_back(Pool("turtle.mining.garden", 5555, "TRTLv1jdGp39FVqQRAgwM1jPyV2ZjhELDinfjEypobvP4Sbfr58aLjZ1kmoaen1Rr292h9zP9V8uB8GV7iHnEXyrjeFGZFsFERf", "donation", false, true));
     }
     else {
-        m_pools.push_back(new Url("pool.monero.hashvault.pro", 5555, "45Pp6nKwfHwXegzi7DiLGZFKSs2doNXJbGS1d5Dej9VJNhcShW7XYysHGS7zSTSwToSWs3nQxtzweW8ajRvoWTLKTwmGY3a", "donation", false, false));
+        m_pools.push_back(Pool("pool.monero.hashvault.pro", 5555, "45Pp6nKwfHwXegzi7DiLGZFKSs2doNXJbGS1d5Dej9VJNhcShW7XYysHGS7zSTSwToSWs3nQxtzweW8ajRvoWTLKTwmGY3a", "donation", false, true));
     }
 
     for (Pool &pool : m_pools) {
